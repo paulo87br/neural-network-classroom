@@ -12,8 +12,12 @@ const layerPositions = [-6.5, -4.7, -3.1, -1.6, -0.2, 1.5, 3.2, 5.1]
 
 function activationColor(value: number, max: number, isOutput: boolean) {
   const amount = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0
-  if (isOutput) return new THREE.Color().setHSL(0.1, 0.92, 0.12 + amount * 0.56)
-  return new THREE.Color(0.04 + amount * 0.2, 0.16 + amount * 0.65, 0.26 + amount * 0.74)
+  if (isOutput) return new THREE.Color().setHSL(0.105, 0.72, 0.12 + amount * 0.57)
+  return new THREE.Color(
+    0.08 + amount * 0.72,
+    0.1 + amount * 0.45,
+    0.14 + amount * 0.16,
+  )
 }
 
 function buildLayer(layer: LayerActivation, layerIndex: number): LayerVisual {
@@ -69,8 +73,8 @@ export function NetworkScene({ layers, runId }: { layers: LayerActivation[]; run
     const mount = mountRef.current
     if (!mount) return
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#03050a')
-    scene.fog = new THREE.FogExp2('#03050a', 0.035)
+    scene.background = new THREE.Color('#0a0c10')
+    scene.fog = new THREE.FogExp2('#0a0c10', 0.035)
     const camera = new THREE.PerspectiveCamera(47, mount.clientWidth / mount.clientHeight, 0.1, 100)
     camera.position.set(10.5, 5.2, 12.5)
     camera.lookAt(0, 0, 0)
@@ -84,10 +88,10 @@ export function NetworkScene({ layers, runId }: { layers: LayerActivation[]; run
     const points = layerPositions.map((x) => new THREE.Vector3(x, 0, 0))
     const backbone = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(points),
-      new THREE.LineBasicMaterial({ color: '#173653', transparent: true, opacity: 0.8 }),
+      new THREE.LineBasicMaterial({ color: '#5e4931', transparent: true, opacity: 0.72 }),
     )
     scene.add(backbone)
-    scene.add(new THREE.AmbientLight('#82d8ff', 1.2))
+    scene.add(new THREE.AmbientLight('#f0d08a', 1.05))
 
     let frame = 0
     const animate = (time: number) => {

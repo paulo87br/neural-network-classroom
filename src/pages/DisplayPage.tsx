@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Maximize, RotateCcw } from 'lucide-react'
 import { ConnectionBadge } from '../components/ConnectionBadge'
+import { BrandSignature } from '../components/BrandSignature'
 import { GridPreview } from '../components/GridPreview'
 import { NetworkScene } from '../components/NetworkScene'
 import { decodeGrid } from '../lib/grid'
@@ -115,6 +116,7 @@ export function DisplayPage({ room }: { room: string }) {
       <NetworkScene layers={layers} runId={runId} />
       <header className="display-header">
         <div>
+          <BrandSignature compact />
           <span className="eyebrow">Rede neural convolucional · Sala {room}</span>
           <h1>Como uma máquina enxerga?</h1>
         </div>

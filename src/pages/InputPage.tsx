@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Eraser, Play, Radio, Send } from 'lucide-react'
 import { ConnectionBadge } from '../components/ConnectionBadge'
+import { BrandSignature } from '../components/BrandSignature'
 import { canvasToGrid, clearDrawing, encodeGrid } from '../lib/grid'
 import { ClassroomBus, type ConnectionState } from '../lib/realtime'
 
@@ -94,7 +95,8 @@ export function InputPage({ room }: { room: string }) {
     <main className="input-page">
       <header className="compact-header">
         <div>
-          <span className="eyebrow">Sala {room}</span>
+          <BrandSignature compact />
+          <span className="eyebrow">Rede neural ao vivo · Sala {room}</span>
           <h1>Desenhe um número</h1>
         </div>
         <ConnectionBadge state={connection} />

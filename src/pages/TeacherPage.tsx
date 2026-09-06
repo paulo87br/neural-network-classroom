@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import QRCode from 'qrcode'
 import { Copy, Eraser, ExternalLink, Lock, Play, RotateCcw, Unlock } from 'lucide-react'
 import { ConnectionBadge } from '../components/ConnectionBadge'
+import { BrandSignature } from '../components/BrandSignature'
 import { encodeGrid, makeDemoDigit } from '../lib/grid'
 import { ClassroomBus, type ConnectionState } from '../lib/realtime'
 
@@ -17,7 +18,7 @@ export function TeacherPage({ room }: { room: string }) {
     const bus = new ClassroomBus(room, 'professor')
     busRef.current = bus
     bus.connect(setConnection)
-    void QRCode.toDataURL(inputUrl, { width: 320, margin: 1, color: { dark: '#07111d', light: '#ffffff' } }).then(setQrCode)
+    void QRCode.toDataURL(inputUrl, { width: 320, margin: 1, color: { dark: '#0a0c10', light: '#ede9e1' } }).then(setQrCode)
     return () => bus.disconnect()
   }, [inputUrl, room])
 
@@ -37,6 +38,7 @@ export function TeacherPage({ room }: { room: string }) {
     <main className="teacher-page">
       <header className="compact-header teacher-header">
         <div>
+          <BrandSignature compact />
           <span className="eyebrow">Painel do professor</span>
           <h1>Sala {room}</h1>
         </div>

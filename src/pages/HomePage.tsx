@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ArrowRight, MonitorUp, Presentation, Tablet } from 'lucide-react'
+import { BrandSignature } from '../components/BrandSignature'
 import { sanitizeRoom } from '../lib/realtime'
 
 export function HomePage() {
@@ -14,6 +15,7 @@ export function HomePage() {
     <main className="home-page">
       <section className="launcher">
         <div className="launcher-title">
+          <BrandSignature />
           <div className="network-mark"><i /><i /><i /><i /><i /></div>
           <span className="eyebrow">Experimento interativo</span>
           <h1>Rede Neural<br />ao Vivo</h1>
@@ -36,7 +38,7 @@ export function HomePage() {
           </div>
         </div>
       </section>
-      <footer className="home-footer">Baseado no projeto CNN Visualization de Kim Seonghyun · Uso educacional</footer>
+      <footer className="home-footer"><a href="https://paulonascimento.me">paulonascimento.me</a><span>Baseado no CNN Visualization de Kim Seonghyun · Uso educacional</span></footer>
     </main>
   )
 }
