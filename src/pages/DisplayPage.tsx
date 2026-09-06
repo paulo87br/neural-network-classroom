@@ -24,6 +24,7 @@ export function DisplayPage({ room }: { room: string }) {
   const [pixels, setPixels] = useState<Float32Array>(blank)
   const [result, setResult] = useState<InferenceResult | null>(null)
   const [runId, setRunId] = useState(0)
+  const [viewResetId, setViewResetId] = useState(0)
   const [activeStage, setActiveStage] = useState(-1)
   const [status, setStatus] = useState('Aguardando um desenho no tablet')
 
@@ -104,6 +105,7 @@ export function DisplayPage({ room }: { room: string }) {
         setResult(null)
       }
       if (event.key.toLowerCase() === 'f') void document.documentElement.requestFullscreen()
+      if (event.key.toLowerCase() === 'r') setViewResetId((value) => value + 1)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -113,7 +115,7 @@ export function DisplayPage({ room }: { room: string }) {
 
   return (
     <main className="display-page">
-      <NetworkScene layers={layers} runId={runId} />
+      <NetworkScene layers={layers} runId={runId} viewResetId={viewResetId} />
       <header className="display-header">
         <div>
           <BrandSignature compact />
@@ -122,6 +124,9 @@ export function DisplayPage({ room }: { room: string }) {
         </div>
         <div className="display-header-actions">
           <ConnectionBadge state={connection} />
+          <button className="icon-button" onClick={() => setViewResetId((value) => value + 1)} aria-label="Restaurar posição da câmera" title="Restaurar câmera">
+            <RotateCcw size={20} />
+          </button>
           <button className="icon-button" onClick={() => void document.documentElement.requestFullscreen()} aria-label="Entrar em tela cheia">
             <Maximize size={20} />
           </button>
@@ -152,6 +157,10 @@ export function DisplayPage({ room }: { room: string }) {
           })}
         </div>
       </section>
+
+      <div className="scene-controls-hint" aria-hidden="true">
+        Arraste para girar <span>·</span> Roda ou pinça para zoom <span>·</span> Botão direito para mover
+      </div>
 
       <footer className="stage-timeline">
         {stageLabels.map((label, index) => (
