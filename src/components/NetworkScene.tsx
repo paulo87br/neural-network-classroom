@@ -7,6 +7,7 @@ type LayerVisual = {
   group: THREE.Group
   material: THREE.MeshBasicMaterial
   baseX: number
+  isOutput: boolean
 }
 
 const layerPositions = [-6.5, -4.7, -3.1, -1.6, -0.2, 1.5, 3.2, 5.1]
@@ -19,6 +20,8 @@ const neuralLow = new THREE.Color('#d9dce1')
 const neuralHigh = new THREE.Color('#ffffff')
 const outputLow = new THREE.Color('#8d6726')
 const outputHigh = new THREE.Color('#f0d08a')
+const activeLayerColor = new THREE.Color('#67ffff')
+const neutralMaterialColor = new THREE.Color('#ffffff')
 
 function activationColor(value: number, max: number, isInput: boolean, isOutput: boolean) {
   const amount = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0
@@ -75,7 +78,7 @@ function buildLayer(layer: LayerActivation, layerIndex: number): LayerVisual {
   mesh.instanceMatrix.needsUpdate = true
   if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
   group.add(mesh)
-  return { group, material, baseX: layerPositions[layerIndex] }
+  return { group, material, baseX: layerPositions[layerIndex], isOutput }
 }
 
 export function NetworkScene({
@@ -106,7 +109,7 @@ export function NetworkScene({
     if (!mount) return
     const scene = new THREE.Scene()
     scene.background = new THREE.Color('#0a0c10')
-    scene.fog = new THREE.FogExp2('#0a0c10', 0.035)
+    scene.fog = new THREE.FogExp2('#0a0c10', 0.018)
     const camera = new THREE.PerspectiveCamera(47, mount.clientWidth / mount.clientHeight, 0.1, 100)
     camera.position.copy(initialCameraPosition)
     camera.lookAt(0, 0, 0)
@@ -137,8 +140,12 @@ export function NetworkScene({
       const activeIndex = Math.max(0, Math.min(visualsRef.current.length - 1, activeStageRef.current))
       visualsRef.current.forEach((visual, index) => {
         const current = index === activeIndex
-        const targetOpacity = current ? 1 : index < activeIndex ? 0.2 : 0.045
+        const targetOpacity = current ? 1 : index < activeIndex ? 0.3 : 0.075
         visual.material.opacity += (targetOpacity - visual.material.opacity) * 0.085
+        // Material color multiplies the per-neuron activation color. Applying
+        // the accent here makes the highlight follow the selected stage.
+        const targetColor = current && !visual.isOutput ? activeLayerColor : neutralMaterialColor
+        visual.material.color.lerp(targetColor, 0.12)
         const pulse = current ? 1.05 + Math.sin(elapsed * 7) * 0.035 : 1
         visual.group.scale.setScalar(pulse)
         const targetX = visual.baseX + (current ? 0.28 : 0)
@@ -187,7 +194,8 @@ export function NetworkScene({
     visualsRef.current = layers.map(buildLayer)
     visualsRef.current.forEach((visual, index) => {
       visual.group.position.x = visual.baseX - 0.45
-      visual.material.opacity = index === 0 ? 1 : 0.045
+      visual.material.opacity = index === 0 ? 1 : 0.075
+      visual.material.color.copy(index === 0 ? activeLayerColor : neutralMaterialColor)
       scene.add(visual.group)
     })
     runStartedRef.current = performance.now()
