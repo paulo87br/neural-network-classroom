@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Maximize, RotateCcw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Maximize, RotateCcw } from 'lucide-react'
 import { ConnectionBadge } from '../components/ConnectionBadge'
 import { BrandSignature } from '../components/BrandSignature'
 import { GridPreview } from '../components/GridPreview'
@@ -28,6 +28,23 @@ export function DisplayPage({ room }: { room: string }) {
   const [activeStage, setActiveStage] = useState(-1)
   const [status, setStatus] = useState('Aguardando um desenho no tablet')
 
+  const stopStagePlayback = useCallback(() => {
+    if (!stageTimerRef.current) return
+    window.clearInterval(stageTimerRef.current)
+    stageTimerRef.current = null
+  }, [])
+
+  const selectStage = useCallback((index: number) => {
+    const currentResult = lastResultRef.current
+    if (!currentResult) return
+    stopStagePlayback()
+    const next = Math.max(0, Math.min(stageLabels.length - 1, index))
+    setActiveStage(next)
+    setStatus(next === stageLabels.length - 1
+      ? `A rede reconheceu o número ${currentResult.prediction}`
+      : `Explorando: ${stageLabels[next]}`)
+  }, [stopStagePlayback])
+
   const runInference = useCallback(async (nextPixels?: Float32Array) => {
     const input = nextPixels || pixelsRef.current
     setStatus('Processando a rede neural…')
@@ -38,7 +55,7 @@ export function DisplayPage({ room }: { room: string }) {
       lastResultRef.current = nextResult
       setResult(nextResult)
       setRunId((value) => value + 1)
-      if (stageTimerRef.current) window.clearInterval(stageTimerRef.current)
+      stopStagePlayback()
       let stage = 0
       stageTimerRef.current = window.setInterval(() => {
         stage += 1
@@ -52,7 +69,7 @@ export function DisplayPage({ room }: { room: string }) {
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Não foi possível carregar o modelo.')
     }
-  }, [])
+  }, [stopStagePlayback])
 
   useEffect(() => {
     void loadClassroomModel().catch(() => undefined)
@@ -106,16 +123,18 @@ export function DisplayPage({ room }: { room: string }) {
       }
       if (event.key.toLowerCase() === 'f') void document.documentElement.requestFullscreen()
       if (event.key.toLowerCase() === 'r') setViewResetId((value) => value + 1)
+      if (event.key === 'ArrowLeft') selectStage(activeStage - 1)
+      if (event.key === 'ArrowRight') selectStage(activeStage + 1)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [pixels, runInference])
+  }, [activeStage, pixels, runInference, selectStage])
 
   const layers = useMemo(() => result?.layers || blankLayers(pixels), [pixels, result])
 
   return (
     <main className="display-page">
-      <NetworkScene layers={layers} runId={runId} viewResetId={viewResetId} />
+      <NetworkScene layers={layers} runId={runId} viewResetId={viewResetId} activeStage={activeStage} />
       <header className="display-header">
         <div>
           <BrandSignature compact />
@@ -163,14 +182,32 @@ export function DisplayPage({ room }: { room: string }) {
       </div>
 
       <footer className="stage-timeline">
-        {stageLabels.map((label, index) => (
-          <div className={index <= activeStage ? 'is-active' : ''} key={label}>
-            <span>{index + 1}</span><b>{label}</b>
-          </div>
-        ))}
-        <button className="replay-button" onClick={() => void runInference()} disabled={!pixels.some((value) => value > 0)}>
-          <RotateCcw size={16} /> Repetir
-        </button>
+        <div className="timeline-steps" aria-label="Etapas da rede neural">
+          {stageLabels.map((label, index) => (
+            <button
+              type="button"
+              className={`stage-step ${index <= activeStage ? 'is-reached' : ''} ${index === activeStage ? 'is-current' : ''}`}
+              key={label}
+              onClick={() => selectStage(index)}
+              disabled={!result}
+              aria-current={index === activeStage ? 'step' : undefined}
+              title={`Ir para ${label}`}
+            >
+              <span>{index + 1}</span><b>{label}</b>
+            </button>
+          ))}
+        </div>
+        <div className="timeline-nav">
+          <button className="timeline-button" onClick={() => selectStage(activeStage - 1)} disabled={!result || activeStage <= 0} aria-label="Etapa anterior" title="Etapa anterior">
+            <ChevronLeft size={18} />
+          </button>
+          <button className="timeline-button" onClick={() => selectStage(activeStage + 1)} disabled={!result || activeStage >= stageLabels.length - 1} aria-label="Próxima etapa" title="Próxima etapa">
+            <ChevronRight size={18} />
+          </button>
+          <button className="replay-button" onClick={() => void runInference()} disabled={!pixels.some((value) => value > 0)}>
+            <RotateCcw size={16} /> Repetir
+          </button>
+        </div>
       </footer>
     </main>
   )

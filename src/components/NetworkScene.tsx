@@ -71,13 +71,28 @@ function buildLayer(layer: LayerActivation, layerIndex: number): LayerVisual {
   return { group, material, baseX: layerPositions[layerIndex] }
 }
 
-export function NetworkScene({ layers, runId, viewResetId }: { layers: LayerActivation[]; runId: number; viewResetId: number }) {
+export function NetworkScene({
+  layers,
+  runId,
+  viewResetId,
+  activeStage,
+}: {
+  layers: LayerActivation[]
+  runId: number
+  viewResetId: number
+  activeStage: number
+}) {
   const mountRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const controlsRef = useRef<OrbitControls | null>(null)
   const visualsRef = useRef<LayerVisual[]>([])
   const runStartedRef = useRef(performance.now())
+  const activeStageRef = useRef(activeStage)
+
+  useEffect(() => {
+    activeStageRef.current = activeStage
+  }, [activeStage])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -112,7 +127,7 @@ export function NetworkScene({ layers, runId, viewResetId }: { layers: LayerActi
     const animate = (time: number) => {
       frame = requestAnimationFrame(animate)
       const elapsed = (time - runStartedRef.current) / 1000
-      const activeIndex = Math.min(visualsRef.current.length - 1, Math.floor(elapsed / 0.72))
+      const activeIndex = Math.min(visualsRef.current.length - 1, activeStageRef.current)
       visualsRef.current.forEach((visual, index) => {
         const active = index <= activeIndex
         visual.material.opacity += ((active ? 0.96 : 0.36) - visual.material.opacity) * 0.065
