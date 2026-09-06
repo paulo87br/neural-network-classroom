@@ -7,8 +7,8 @@ export type EventHandler = (payload: Record<string, unknown>) => void
 let client: SupabaseClient | null = null
 
 function getClient() {
-  const url = import.meta.env.VITE_SUPABASE_URL
-  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+  const url = __SUPABASE_URL__
+  const key = __SUPABASE_PUBLISHABLE_KEY__
   if (!url || !key) return null
   if (!client) client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
   return client

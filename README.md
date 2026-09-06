@@ -29,8 +29,8 @@ A aplicação usa apenas canais públicos do Supabase Realtime Broadcast. Não c
 Variáveis necessárias:
 
 ```env
-VITE_SUPABASE_URL=https://PROJECT_REF.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+SUPABASE_URL=https://PROJECT_REF.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
 Sem essas variáveis, a aplicação entra em modo local para demonstrações com abas abertas no mesmo navegador.
@@ -38,7 +38,9 @@ Sem essas variáveis, a aplicação entra em modo local para demonstrações com
 ## Deploy na Vercel
 
 1. Importe este repositório na Vercel.
-2. Adicione as duas variáveis acima em **Project Settings → Environment Variables**.
+2. Use as variáveis criadas pela integração do Supabase: `SUPABASE_URL` e
+   `SUPABASE_PUBLISHABLE_KEY`. O build expõe apenas esses dois valores
+   públicos; nunca use `SUPABASE_SECRET_KEY` ou `service_role`.
 3. Faça o deploy.
 4. Abra primeiro `/teacher` e use o QR Code para conectar o tablet.
 
