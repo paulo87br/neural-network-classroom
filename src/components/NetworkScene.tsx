@@ -13,8 +13,10 @@ const layerPositions = [-6.5, -4.7, -3.1, -1.6, -0.2, 1.5, 3.2, 5.1]
 const initialCameraPosition = new THREE.Vector3(10.5, 5.2, 12.5)
 const inputLow = new THREE.Color('#24282f')
 const inputHigh = new THREE.Color('#ffffff')
-const neuralLow = new THREE.Color('#69717d')
-const neuralHigh = new THREE.Color('#f5f5f2')
+// The inactive-state opacity already separates past and future layers. Keep the
+// actual neurons light so the selected layer reads clearly on a dark projector.
+const neuralLow = new THREE.Color('#d9dce1')
+const neuralHigh = new THREE.Color('#ffffff')
 const outputLow = new THREE.Color('#8d6726')
 const outputHigh = new THREE.Color('#f0d08a')
 
