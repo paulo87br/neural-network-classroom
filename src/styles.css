@@ -109,14 +109,14 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 300; text-wra
 .input-monitor { position: absolute; z-index: 3; left: clamp(1.5rem, 3cqw, 3rem); top: 39%; display: grid; gap: 0.7rem; color: var(--cinza); font: 500 clamp(0.68rem, 0.72cqw, 0.82rem) 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
 .grid-preview { width: clamp(110px, 11cqw, 190px); aspect-ratio: 1; image-rendering: pixelated; border: 1px solid rgba(217, 164, 65, 0.45); border-radius: 8px; background: #000; box-shadow: 0 0 36px rgba(217, 164, 65, 0.12); }
 .result-panel { position: absolute; z-index: 3; right: clamp(1.5rem, 3cqw, 3rem); top: 28%; width: clamp(230px, 19cqw, 350px); border-left: 1px solid var(--fumaca); padding-left: clamp(1rem, 2cqw, 2rem); }
-.result-copy strong { display: block; color: var(--ouro-claro); font: 300 clamp(5rem, 9cqw, 10rem)/0.85 'Fraunces', Georgia, serif; letter-spacing: -0.07em; text-shadow: 0 0 40px rgba(217, 164, 65, 0.25); }
+.result-copy strong { display: block; color: var(--ouro); font: 300 clamp(5rem, 9cqw, 10rem)/0.85 'Fraunces', Georgia, serif; letter-spacing: -0.07em; text-shadow: 0 0 40px rgba(217, 164, 65, 0.25); }
 .result-copy p { min-height: 2.8em; margin: 0.85rem 0 1.4rem; color: var(--cinza); font-size: clamp(0.8rem, 1cqw, 1rem); line-height: 1.5; }
 .probability-list { display: grid; gap: 0.42rem; }
 .probability-row { display: grid; grid-template-columns: 1rem 1fr 2.7rem; align-items: center; gap: 0.5rem; color: var(--cinza); font: 500 0.72rem 'JetBrains Mono', monospace; }
 .probability-row > div { height: 4px; background: var(--carvao-alto); }
 .probability-row i { height: 100%; display: block; background: #5e4931; transition: width 600ms ease; }
 .probability-row b { text-align: right; font-weight: 500; }
-.probability-row.is-winner { color: var(--ouro-claro); }.probability-row.is-winner i { background: var(--dado); box-shadow: 0 0 10px rgba(192,136,72,0.6); }
+.probability-row.is-winner { color: var(--ouro); }.probability-row.is-winner i { background: var(--ouro); box-shadow: 0 0 10px rgba(217,164,65,0.52); }
 .stage-timeline { position: absolute; z-index: 4; left: clamp(1.5rem, 3cqw, 3rem); right: clamp(1.5rem, 3cqw, 3rem); bottom: clamp(1.3rem, 3cqw, 2.5rem); display: flex; align-items: center; gap: 1rem; }
 .timeline-steps { min-width: 0; flex: 1; display: grid; grid-template-columns: repeat(8, minmax(54px, 1fr)); align-items: center; }
 .stage-step { position: relative; min-width: 0; padding: 0; border: 0; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.45rem; color: #4e5869; background: transparent; font: 500 0.66rem 'JetBrains Mono', monospace; text-align: left; cursor: pointer; }

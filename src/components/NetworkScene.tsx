@@ -22,14 +22,14 @@ const colorPalettes = {
     background: '#0a0c10',
     inputLow: '#24282f', inputHigh: '#ffffff',
     neuralLow: '#d9dce1', neuralHigh: '#ffffff',
-    outputLow: '#8d6726', outputHigh: '#f0d08a',
+    outputLow: '#8d6726', outputHigh: '#d9a441',
     activeLow: '#174a52', activeHigh: '#67ffff',
   },
   light: {
     background: '#f3f1eb',
     inputLow: '#c8ccd1', inputHigh: '#11151b',
     neuralLow: '#727983', neuralHigh: '#171b22',
-    outputLow: '#b27c18', outputHigh: '#6f4700',
+    outputLow: '#b27c18', outputHigh: '#d9a441',
     activeLow: '#6bcbd6', activeHigh: '#007f96',
   },
 } as const
