@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { AuthGate } from './components/AuthGate'
 import { sanitizeRoom } from './lib/realtime'
 
 const DisplayPage = lazy(() => import('./pages/DisplayPage').then((module) => ({ default: module.DisplayPage })))
@@ -16,5 +17,9 @@ export default function App() {
   if (path === '/display') page = <DisplayPage room={room} />
   if (path === '/input') page = <InputPage room={room} />
   if (path === '/teacher') page = <TeacherPage room={room} />
-  return <Suspense fallback={<div className="route-loading">Carregando experiência…</div>}>{page}</Suspense>
+  return (
+    <AuthGate>
+      <Suspense fallback={<div className="route-loading">Carregando experiência…</div>}>{page}</Suspense>
+    </AuthGate>
+  )
 }

@@ -1,17 +1,12 @@
-import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
+import type { RealtimeChannel } from '@supabase/supabase-js'
+import { getSupabaseClient } from './supabase'
 
 export type ConnectionState = 'connecting' | 'connected' | 'local' | 'error'
 export type ClassroomEvent = 'frame' | 'process' | 'clear' | 'replay' | 'lock'
 export type EventHandler = (payload: Record<string, unknown>) => void
 
-let client: SupabaseClient | null = null
-
 function getClient() {
-  const url = __SUPABASE_URL__
-  const key = __SUPABASE_PUBLISHABLE_KEY__
-  if (!url || !key) return null
-  if (!client) client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
-  return client
+  return getSupabaseClient()
 }
 
 export function sanitizeRoom(value: string | null | undefined) {

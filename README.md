@@ -35,6 +35,13 @@ SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 Sem essas variáveis, a aplicação entra em modo local para demonstrações com abas abertas no mesmo navegador.
 
+## Acesso
+
+Todas as rotas exigem login por e-mail e senha no Supabase Auth. Depois de
+autenticar, a aplicação consulta `pulso_is_admin()` e libera somente as contas
+que já pertencem à lista administrativa do Pulso. A sessão fica salva no
+navegador; no tablet e no computador do projetor, basta entrar uma vez.
+
 ## Deploy na Vercel
 
 1. Importe este repositório na Vercel.
