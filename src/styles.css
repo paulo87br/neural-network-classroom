@@ -138,6 +138,28 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 300; text-wra
 .scene-controls-hint { position: absolute; z-index: 4; right: clamp(1.5rem, 3cqw, 3rem); bottom: clamp(5.2rem, 6cqw, 6.4rem); display: flex; gap: 0.55rem; color: rgba(237, 233, 225, 0.5); font: 500 0.65rem 'JetBrains Mono', monospace; letter-spacing: 0.02em; pointer-events: none; }
 .scene-controls-hint span { color: var(--ouro); }
 
+/* Tema claro opcional para salas em que a projeção perde contraste no preto. */
+.display-page.is-light {
+  --preto: #f3f1eb;
+  --carvao: #e6e3dc;
+  --carvao-alto: #d9d6ce;
+  --fumaca: #c4c0b7;
+  --osso: #171a20;
+  --cinza: #5c6470;
+  --line: rgba(23, 26, 32, 0.14);
+  background: var(--preto);
+  color: var(--osso);
+}
+.display-page.is-light::before { background-image: radial-gradient(rgba(23,26,32,0.065) 1px, transparent 1px); }
+.display-page.is-light::after { background: linear-gradient(90deg, rgba(243,241,235,0.72), transparent 24%, transparent 73%, rgba(243,241,235,0.52)); }
+.display-page.is-light .connection-badge,
+.display-page.is-light .icon-button,
+.display-page.is-light .timeline-button,
+.display-page.is-light .replay-button { background: rgba(255,255,255,0.78); }
+.display-page.is-light .scene-controls-hint { color: rgba(23,26,32,0.62); }
+.display-page.is-light .stage-step { color: #777d86; }
+.display-page.is-light .stage-step:not(:disabled):hover { color: var(--osso); }
+
 /* Professor */
 .teacher-page { min-height: 100vh; padding: clamp(1.5rem, 4vw, 4rem); background: radial-gradient(90% 65% at 85% 0%, rgba(217, 164, 65, 0.1), transparent 58%), var(--preto); }
 .teacher-header { max-width: 1180px; margin: 0 auto 2rem; }

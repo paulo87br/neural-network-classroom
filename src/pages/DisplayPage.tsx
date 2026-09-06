@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Maximize, RotateCcw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Maximize, Moon, RotateCcw, Sun } from 'lucide-react'
 import { ConnectionBadge } from '../components/ConnectionBadge'
 import { BrandSignature } from '../components/BrandSignature'
 import { GridPreview } from '../components/GridPreview'
-import { NetworkScene } from '../components/NetworkScene'
+import { NetworkScene, type DisplayTheme } from '../components/NetworkScene'
 import { decodeGrid } from '../lib/grid'
 import { loadClassroomModel, type InferenceResult, type LayerActivation } from '../lib/model'
 import { ClassroomBus, type ConnectionState } from '../lib/realtime'
@@ -27,6 +27,14 @@ export function DisplayPage({ room }: { room: string }) {
   const [viewResetId, setViewResetId] = useState(0)
   const [activeStage, setActiveStage] = useState(-1)
   const [status, setStatus] = useState('Aguardando um desenho no tablet')
+  const [theme, setTheme] = useState<DisplayTheme>(() => {
+    const saved = window.localStorage.getItem('cnn3d-display-theme')
+    return saved === 'light' ? 'light' : 'dark'
+  })
+
+  useEffect(() => {
+    window.localStorage.setItem('cnn3d-display-theme', theme)
+  }, [theme])
 
   const stopStagePlayback = useCallback(() => {
     if (!stageTimerRef.current) return
@@ -133,8 +141,8 @@ export function DisplayPage({ room }: { room: string }) {
   const layers = useMemo(() => result?.layers || blankLayers(pixels), [pixels, result])
 
   return (
-    <main className="display-page">
-      <NetworkScene layers={layers} runId={runId} viewResetId={viewResetId} activeStage={activeStage} />
+    <main className={`display-page is-${theme}`}>
+      <NetworkScene layers={layers} runId={runId} viewResetId={viewResetId} activeStage={activeStage} theme={theme} />
       <header className="display-header">
         <div>
           <BrandSignature compact />
@@ -143,6 +151,14 @@ export function DisplayPage({ room }: { room: string }) {
         </div>
         <div className="display-header-actions">
           <ConnectionBadge state={connection} />
+          <button
+            className="icon-button"
+            onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
+            aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
           <button className="icon-button" onClick={() => setViewResetId((value) => value + 1)} aria-label="Restaurar posição da câmera" title="Restaurar câmera">
             <RotateCcw size={20} />
           </button>

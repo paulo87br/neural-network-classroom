@@ -5,28 +5,51 @@ import type { LayerActivation } from '../lib/model'
 
 type LayerVisual = {
   group: THREE.Group
+  mesh: THREE.InstancedMesh
   material: THREE.MeshBasicMaterial
   baseX: number
+  amounts: Float32Array
+  isInput: boolean
   isOutput: boolean
 }
 
+export type DisplayTheme = 'dark' | 'light'
+
 const layerPositions = [-6.5, -4.7, -3.1, -1.6, -0.2, 1.5, 3.2, 5.1]
 const initialCameraPosition = new THREE.Vector3(10.5, 5.2, 12.5)
-const inputLow = new THREE.Color('#24282f')
-const inputHigh = new THREE.Color('#ffffff')
-// The inactive-state opacity already separates past and future layers. Keep the
-// actual neurons light so the selected layer reads clearly on a dark projector.
-const neuralLow = new THREE.Color('#d9dce1')
-const neuralHigh = new THREE.Color('#ffffff')
-const outputLow = new THREE.Color('#8d6726')
-const outputHigh = new THREE.Color('#f0d08a')
-const activeLayerColor = new THREE.Color('#67ffff')
-const neutralMaterialColor = new THREE.Color('#ffffff')
+const colorPalettes = {
+  dark: {
+    background: '#0a0c10',
+    inputLow: '#24282f', inputHigh: '#ffffff',
+    neuralLow: '#d9dce1', neuralHigh: '#ffffff',
+    outputLow: '#8d6726', outputHigh: '#f0d08a',
+    activeLow: '#174a52', activeHigh: '#67ffff',
+  },
+  light: {
+    background: '#f3f1eb',
+    inputLow: '#c8ccd1', inputHigh: '#11151b',
+    neuralLow: '#727983', neuralHigh: '#171b22',
+    outputLow: '#b27c18', outputHigh: '#6f4700',
+    activeLow: '#6bcbd6', activeHigh: '#007f96',
+  },
+} as const
 
-function activationColor(value: number, max: number, isInput: boolean, isOutput: boolean) {
-  const amount = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0
-  if (isInput) return inputLow.clone().lerp(inputHigh, Math.pow(amount, 0.55))
-  return (isOutput ? outputLow : neuralLow).clone().lerp(isOutput ? outputHigh : neuralHigh, amount)
+function layerColor(amount: number, isInput: boolean, isOutput: boolean, active: boolean, theme: DisplayTheme) {
+  const palette = colorPalettes[theme]
+  if (active && !isOutput) {
+    const strength = 0.38 + Math.pow(amount, 0.55) * 0.62
+    return new THREE.Color(palette.activeLow).lerp(new THREE.Color(palette.activeHigh), strength)
+  }
+  if (isInput) return new THREE.Color(palette.inputLow).lerp(new THREE.Color(palette.inputHigh), Math.pow(amount, 0.55))
+  return new THREE.Color(isOutput ? palette.outputLow : palette.neuralLow)
+    .lerp(new THREE.Color(isOutput ? palette.outputHigh : palette.neuralHigh), amount)
+}
+
+function paintLayer(visual: LayerVisual, active: boolean, theme: DisplayTheme) {
+  for (let index = 0; index < visual.amounts.length; index += 1) {
+    visual.mesh.setColorAt(index, layerColor(visual.amounts[index], visual.isInput, visual.isOutput, active, theme))
+  }
+  if (visual.mesh.instanceColor) visual.mesh.instanceColor.needsUpdate = true
 }
 
 function buildLayer(layer: LayerActivation, layerIndex: number): LayerVisual {
@@ -51,6 +74,7 @@ function buildLayer(layer: LayerActivation, layerIndex: number): LayerVisual {
   mesh.instanceMatrix.setUsage(THREE.StaticDrawUsage)
   const matrix = new THREE.Matrix4()
   const max = Math.max(...layer.values, 0.00001)
+  const amounts = new Float32Array(count)
 
   for (let index = 0; index < count; index += 1) {
     let x = 0
@@ -70,15 +94,16 @@ function buildLayer(layer: LayerActivation, layerIndex: number): LayerVisual {
       x = channels === 1 ? 0 : (channel / (channels - 1) - 0.5) * 0.75
     }
     const amount = Math.min(1, Math.max(0, layer.values[index] / max))
+    amounts[index] = amount
     const valueScale = isInput ? 0.16 + Math.pow(amount, 0.6) * 1.65 : 0.45 + amount
     matrix.compose(new THREE.Vector3(x, y, z), new THREE.Quaternion(), new THREE.Vector3(valueScale, valueScale, valueScale))
     mesh.setMatrixAt(index, matrix)
-    mesh.setColorAt(index, activationColor(layer.values[index], max, isInput, isOutput))
+    mesh.setColorAt(index, layerColor(amount, isInput, isOutput, false, 'dark'))
   }
   mesh.instanceMatrix.needsUpdate = true
   if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
   group.add(mesh)
-  return { group, material, baseX: layerPositions[layerIndex], isOutput }
+  return { group, mesh, material, baseX: layerPositions[layerIndex], amounts, isInput, isOutput }
 }
 
 export function NetworkScene({
@@ -86,11 +111,13 @@ export function NetworkScene({
   runId,
   viewResetId,
   activeStage,
+  theme,
 }: {
   layers: LayerActivation[]
   runId: number
   viewResetId: number
   activeStage: number
+  theme: DisplayTheme
 }) {
   const mountRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
@@ -108,8 +135,8 @@ export function NetworkScene({
     const mount = mountRef.current
     if (!mount) return
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#0a0c10')
-    scene.fog = new THREE.FogExp2('#0a0c10', 0.018)
+    scene.background = new THREE.Color(colorPalettes[theme].background)
+    scene.fog = new THREE.FogExp2(colorPalettes[theme].background, theme === 'dark' ? 0.018 : 0.012)
     const camera = new THREE.PerspectiveCamera(47, mount.clientWidth / mount.clientHeight, 0.1, 100)
     camera.position.copy(initialCameraPosition)
     camera.lookAt(0, 0, 0)
@@ -142,10 +169,6 @@ export function NetworkScene({
         const current = index === activeIndex
         const targetOpacity = current ? 1 : index < activeIndex ? 0.3 : 0.075
         visual.material.opacity += (targetOpacity - visual.material.opacity) * 0.085
-        // Material color multiplies the per-neuron activation color. Applying
-        // the accent here makes the highlight follow the selected stage.
-        const targetColor = current && !visual.isOutput ? activeLayerColor : neutralMaterialColor
-        visual.material.color.lerp(targetColor, 0.12)
         const pulse = current ? 1.05 + Math.sin(elapsed * 7) * 0.035 : 1
         visual.group.scale.setScalar(pulse)
         const targetX = visual.baseX + (current ? 0.28 : 0)
@@ -184,6 +207,17 @@ export function NetworkScene({
   useEffect(() => {
     const scene = sceneRef.current
     if (!scene) return
+    const palette = colorPalettes[theme]
+    scene.background = new THREE.Color(palette.background)
+    if (scene.fog instanceof THREE.FogExp2) {
+      scene.fog.color.set(palette.background)
+      scene.fog.density = theme === 'dark' ? 0.018 : 0.012
+    }
+  }, [theme])
+
+  useEffect(() => {
+    const scene = sceneRef.current
+    if (!scene) return
     visualsRef.current.forEach(({ group, material }) => {
       scene.remove(group)
       group.traverse((object) => {
@@ -192,14 +226,20 @@ export function NetworkScene({
       material.dispose()
     })
     visualsRef.current = layers.map(buildLayer)
+    const activeIndex = Math.max(0, Math.min(visualsRef.current.length - 1, activeStage))
     visualsRef.current.forEach((visual, index) => {
       visual.group.position.x = visual.baseX - 0.45
-      visual.material.opacity = index === 0 ? 1 : 0.075
-      visual.material.color.copy(index === 0 ? activeLayerColor : neutralMaterialColor)
+      visual.material.opacity = index === activeIndex ? 1 : index < activeIndex ? 0.3 : 0.075
+      paintLayer(visual, index === activeIndex, theme)
       scene.add(visual.group)
     })
     runStartedRef.current = performance.now()
   }, [layers, runId])
+
+  useEffect(() => {
+    const activeIndex = Math.max(0, Math.min(visualsRef.current.length - 1, activeStage))
+    visualsRef.current.forEach((visual, index) => paintLayer(visual, index === activeIndex, theme))
+  }, [activeStage, theme, layers, runId])
 
   useEffect(() => {
     const camera = cameraRef.current
