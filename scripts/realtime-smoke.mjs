@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-const url = process.env.VITE_SUPABASE_URL
-const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
-if (!url || !key) throw new Error('Defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY.')
+const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+const key = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY
+if (!url || !key) throw new Error('Defina SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY.')
+if (key.startsWith('sb_secret_')) throw new Error('Use a chave publishable; nunca uma chave secret.')
 
 const sender = createClient(url, key, { auth: { persistSession: false } })
 const receiver = createClient(url, key, { auth: { persistSession: false } })
