@@ -2,7 +2,7 @@ import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useStat
 import type { Session } from '@supabase/supabase-js'
 import { LogIn, LogOut } from 'lucide-react'
 import { BrandSignature } from './BrandSignature'
-import { getSupabaseClient } from '../lib/supabase'
+import { getSupabaseClient, initializeSupabaseClient } from '../lib/supabase'
 
 type AuthState = 'booting' | 'anonymous' | 'authenticating' | 'authenticated' | 'unauthorized' | 'verification-error' | 'configuration-error'
 
@@ -16,7 +16,19 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const mountedRef = useRef(true)
   const authorizedUserIdRef = useRef<string | null>(null)
   const pendingUserIdRef = useRef<string | null>(null)
-  const client = getSupabaseClient()
+  const [client, setClient] = useState(() => getSupabaseClient())
+  const [configurationResolved, setConfigurationResolved] = useState(Boolean(client))
+
+  useEffect(() => {
+    if (client) return
+    let active = true
+    void initializeSupabaseClient().then((configuredClient) => {
+      if (!active) return
+      setClient(configuredClient)
+      setConfigurationResolved(true)
+    })
+    return () => { active = false }
+  }, [client])
 
   const transition = useCallback((next: AuthState) => {
     stateRef.current = next
@@ -60,6 +72,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     mountedRef.current = true
+    if (!configurationResolved) return () => { mountedRef.current = false }
     if (!client) {
       transition('configuration-error')
       return () => { mountedRef.current = false }
@@ -98,7 +111,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       mountedRef.current = false
       listener.subscription.unsubscribe()
     }
-  }, [client, transition, verifyAccess])
+  }, [client, configurationResolved, transition, verifyAccess])
 
   const signIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

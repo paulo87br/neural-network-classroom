@@ -46,8 +46,10 @@ navegador; no tablet e no computador do projetor, basta entrar uma vez.
 
 1. Importe este repositório na Vercel.
 2. Use as variáveis criadas pela integração do Supabase: `SUPABASE_URL` e
-   `SUPABASE_PUBLISHABLE_KEY`. O build expõe apenas esses dois valores
-   públicos; nunca use `SUPABASE_SECRET_KEY` ou `service_role`.
+   `SUPABASE_PUBLISHABLE_KEY`. O build e `/api/config` expõem apenas esses dois
+   valores públicos; nunca use `SUPABASE_SECRET_KEY` ou `service_role`. O
+   fallback em runtime evita que um build estático antigo prenda o laboratório
+   no modo local após uma correção das variáveis.
 3. Faça o deploy.
 4. Abra primeiro `/teacher` e use o QR Code para conectar o tablet.
 
