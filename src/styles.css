@@ -111,6 +111,14 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 300; text-wra
 .result-panel { position: absolute; z-index: 3; right: clamp(1.5rem, 3cqw, 3rem); top: 28%; width: clamp(230px, 19cqw, 350px); border-left: 1px solid var(--fumaca); padding-left: clamp(1rem, 2cqw, 2rem); }
 .result-copy strong { display: block; color: var(--ouro); font: 300 clamp(5rem, 9cqw, 10rem)/0.85 'Fraunces', Georgia, serif; letter-spacing: -0.07em; text-shadow: 0 0 40px rgba(217, 164, 65, 0.25); }
 .result-copy p { min-height: 2.8em; margin: 0.85rem 0 1.4rem; color: var(--cinza); font-size: clamp(0.8rem, 1cqw, 1rem); line-height: 1.5; }
+.layer-copy h2 { margin: 0.6rem 0 0.75rem; color: var(--osso); font: 300 clamp(1.8rem, 2.3cqw, 3rem)/1 'Fraunces', Georgia, serif; }
+.layer-copy > p { margin: 0 0 1rem; color: var(--cinza); font-size: clamp(0.76rem, 0.82cqw, 0.9rem); line-height: 1.5; }
+.layer-facts { display: grid; gap: 0.45rem; margin-bottom: 1rem; }
+.layer-facts span { padding: 0.55rem 0.65rem; border: 1px solid var(--fumaca); border-radius: 7px; background: color-mix(in srgb, var(--carvao) 82%, transparent); }
+.layer-facts small, .layer-facts strong { display: block; }
+.layer-facts small { margin-bottom: 0.2rem; color: var(--cinza); font: 500 0.58rem 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.layer-facts strong { color: var(--ouro-claro); font: 600 0.72rem 'JetBrains Mono', monospace; }
+.probability-list.is-secondary { opacity: 0.38; }
 .probability-list { display: grid; gap: 0.42rem; }
 .probability-row { display: grid; grid-template-columns: 1rem 1fr 2.7rem; align-items: center; gap: 0.5rem; color: var(--cinza); font: 500 0.72rem 'JetBrains Mono', monospace; }
 .probability-row > div { height: 4px; background: var(--carvao-alto); }

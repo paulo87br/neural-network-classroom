@@ -10,6 +10,26 @@ import { ClassroomBus, type ConnectionState } from '../lib/realtime'
 
 const blank = new Float32Array(32 * 32)
 const stageLabels = ['Entrada', 'Conv 1', 'Conv 2', 'Conv 3', 'Conv 4', 'Flatten', 'Densa', 'Saída']
+const stageExplanations = [
+  'O desenho entra como uma grade de 1.024 intensidades.',
+  'Filtros procuram traços simples, como bordas e pequenas curvas.',
+  'Os sinais anteriores são combinados para formar padrões maiores.',
+  'A rede preserva combinações que ajudam a distinguir os algarismos.',
+  'A última convolução concentra os padrões mais úteis para a decisão.',
+  'Os mapas são reorganizados em um único vetor, sem alterar os valores.',
+  'Cada posição do vetor contribui com pesos diferentes para as dez opções.',
+  'Softmax transforma as dez notas em probabilidades que somam 100%.',
+] as const
+
+function summarizeLayer(layer: LayerActivation) {
+  const values = Array.from(layer.values)
+  const positive = values.filter((value) => value > 0).length
+  const strongest = values.reduce((maximum, value) => Math.max(maximum, Math.abs(value)), 0)
+  const shape = layer.shape[0] === 1 && layer.shape[1] === 1
+    ? `vetor [${layer.shape[2]}]`
+    : layer.shape.join(' × ')
+  return { positive, strongest, shape, total: values.length }
+}
 
 function blankLayers(pixels: Float32Array): LayerActivation[] {
   return [{ id: 'input', label: 'Entrada 32×32', shape: [1, 32, 32], values: pixels }]
@@ -139,6 +159,8 @@ export function DisplayPage({ room }: { room: string }) {
   }, [activeStage, pixels, runInference, selectStage])
 
   const layers = useMemo(() => result?.layers || blankLayers(pixels), [pixels, result])
+  const observedLayer = result && activeStage >= 0 ? result.layers[activeStage] : null
+  const layerSummary = observedLayer ? summarizeLayer(observedLayer) : null
 
   return (
     <main className={`display-page is-${theme}`}>
@@ -174,12 +196,21 @@ export function DisplayPage({ room }: { room: string }) {
       </section>
 
       <section className="result-panel" aria-live="polite">
-        <div className="result-copy">
+        {observedLayer && activeStage < stageLabels.length - 1 && layerSummary ? <div className="layer-copy">
+          <span className="eyebrow">O que esta etapa produziu</span>
+          <h2>{observedLayer.label}</h2>
+          <p>{stageExplanations[activeStage]}</p>
+          <div className="layer-facts">
+            <span><small>Formato da saída</small><strong>{layerSummary.shape}</strong></span>
+            <span><small>Sinais positivos</small><strong>{layerSummary.positive} de {layerSummary.total}</strong></span>
+            <span><small>Maior intensidade</small><strong>{layerSummary.strongest.toFixed(2)}</strong></span>
+          </div>
+        </div> : <div className="result-copy">
           <span className="eyebrow">Resultado</span>
           <strong>{result ? result.prediction : '—'}</strong>
           <p>{status}</p>
-        </div>
-        <div className="probability-list">
+        </div>}
+        <div className={`probability-list ${activeStage < stageLabels.length - 1 ? 'is-secondary' : ''}`}>
           {Array.from({ length: 10 }, (_, number) => {
             const probability = result?.probabilities[number] || 0
             return (
